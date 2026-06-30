@@ -20,7 +20,9 @@ Even for country-scale bboxes this stays small (vector, not raster):
 
 Source
 ------
-    https://tipg-tiler-template.replit.app/collections/public.ea_river_networks_tdx_v2
+    TIPG (OGC API - Features). The endpoint is read from the environment, not
+    hardcoded — set TIPG_API_BASE (and optionally TIPG_RIVER_COLLECTION) in
+    .env or your shell. See .env.sample for the Cloud Run + Cloud SQL values.
 
 Output
 ------
@@ -33,6 +35,7 @@ Usage
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -40,8 +43,14 @@ import requests
 
 from common import add_common_args, parse_region
 
-API_BASE   = "https://tipg-tiler-template.replit.app"
-COLLECTION = "public.ea_river_networks_tdx_v2"
+# TIPG endpoint comes from the environment — the served URL is NOT baked into
+# the code. Set TIPG_API_BASE (and optionally TIPG_RIVER_COLLECTION) in .env
+# or your shell; see .env.sample for the Cloud Run + Cloud SQL tipg values.
+API_BASE   = os.environ.get("TIPG_API_BASE")
+COLLECTION = os.environ.get("TIPG_RIVER_COLLECTION", "gha.geoglows_rivers")
+if not API_BASE:
+    sys.exit("TIPG_API_BASE is not set. Copy .env.sample to .env and set it "
+             "(or `export TIPG_API_BASE=...`) before running.")
 ITEMS_URL  = f"{API_BASE}/collections/{COLLECTION}/items"
 PAGE_LIMIT = 10000   # API max per page
 
